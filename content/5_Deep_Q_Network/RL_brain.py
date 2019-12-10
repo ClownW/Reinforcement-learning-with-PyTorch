@@ -10,7 +10,7 @@ import copy
 np.random.seed(1)
 torch.manual_seed(1)
 
-
+# define the network architecture
 class Net(nn.Module):
 	def __init__(self, n_feature, n_hidden, n_output):
 		super(Net, self).__init__()
@@ -88,7 +88,11 @@ class DeepQNetwork():
 		else:
 			sample_index = np.random.choice(self.memory_counter, size=self.batch_size)
 		batch_memory = self.memory[sample_index, :]
+
+		# q_next is used for getting which action would be choosed by target network in state s_(t+1)
 		q_next, q_eval = self.q_target(torch.Tensor(batch_memory[:, -self.n_features:])), self.q_eval(torch.Tensor(batch_memory[:, :self.n_features]))
+		# used for calculating y, we need to copy for q_eval because this operation could keep the Q_value that has not been selected unchanged,
+		# so when we do q_target - q_eval, these Q_value become zero and wouldn't affect the calculation of the loss 
 		q_target = torch.Tensor(q_eval.data.numpy().copy())
 
 		batch_index = np.arange(self.batch_size, dtype=np.int32)
